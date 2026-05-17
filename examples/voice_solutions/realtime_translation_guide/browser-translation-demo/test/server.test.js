@@ -27,6 +27,7 @@ test("serves the browser app from the root route", async () => {
     assert.match(response.headers.get("content-type") ?? "", /text\/html/);
     assert.match(body, /In-browser Realtime Translation/);
     assert.match(body, /Start translating microphone/);
+    assert.match(body, /<option value="en" selected>English<\/option>/);
     assert.doesNotMatch(body, /Start translating</);
     assert.doesNotMatch(body, /OpenAI Developers/);
     assert.doesNotMatch(body, /class="topbar"/);
