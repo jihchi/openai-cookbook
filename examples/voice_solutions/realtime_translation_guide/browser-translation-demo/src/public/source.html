@@ -34,14 +34,14 @@
   <body>
     <main class="source-shell">
       <section class="source-card">
-        <p class="eyebrow">Test source tab</p>
+        <p class="eyebrow">Reference audio</p>
         <h1>English source audio</h1>
         <p class="summary">
-          Press Play, leave this tab speaking, then share this Chrome tab from
-          the translation app with tab audio enabled. This page uses a real
-          audio element so Chrome tab capture receives media audio.
+          Press Play if you want a reference voice to practice translating
+          through your microphone. This page plays a local audio sample only;
+          the translation app captures your microphone.
         </p>
-        <audio id="sourceAudio" src="/source-speech.wav" controls loop preload="auto"></audio>
+        <audio id="referenceAudio" src="/source-speech.wav" controls loop preload="auto"></audio>
         <div class="source-actions">
           <button id="playButton" type="button">Play looping audio file</button>
           <button id="stopSourceButton" type="button" class="secondary">Stop</button>
@@ -51,24 +51,24 @@
     </main>
 
     <script>
-      const sourceAudio = document.querySelector("#sourceAudio");
+      const referenceAudio = document.querySelector("#referenceAudio");
       const playButton = document.querySelector("#playButton");
       const stopSourceButton = document.querySelector("#stopSourceButton");
       const lineText = document.querySelector("#lineText");
 
       playButton.addEventListener("click", async () => {
-        await sourceAudio.play();
+        await referenceAudio.play();
         lineText.textContent = "Playing the looping source audio file.";
       });
 
       stopSourceButton.addEventListener("click", () => {
-        sourceAudio.pause();
-        sourceAudio.currentTime = 0;
+        referenceAudio.pause();
+        referenceAudio.currentTime = 0;
         lineText.textContent = "Stopped.";
       });
 
-      sourceAudio.addEventListener("play", () => {
-        lineText.textContent = "Playing. Share this tab and enable tab audio.";
+      referenceAudio.addEventListener("play", () => {
+        lineText.textContent = "Playing reference audio.";
       });
     </script>
   </body>

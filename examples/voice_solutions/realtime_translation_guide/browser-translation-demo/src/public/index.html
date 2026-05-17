@@ -13,7 +13,7 @@
           <p class="eyebrow">Browser demo</p>
           <h1>In-browser Realtime Translation</h1>
           <p class="summary">
-            Capture audio from a browser tab, send it to Realtime Translation
+            Capture audio from your microphone, send it to Realtime Translation
             over WebRTC, and play translated speech back locally.
           </p>
         </div>
@@ -60,14 +60,14 @@
             value="85"
           />
           <div class="mix-scale" aria-hidden="true">
-            <span id="originalMixLabel">Original 15%</span>
+            <span id="originalMixLabel">Mic monitor off</span>
             <span id="translatedMixLabel">Translated 85%</span>
           </div>
         </div>
 
         <div class="dock-section button-row">
           <button id="startButton" type="button">
-            Choose tab to start translating
+            Start translating microphone
           </button>
           <button id="stopButton" type="button" class="secondary" disabled>
             Stop
@@ -77,7 +77,7 @@
 
       <section class="meters" aria-label="Audio status">
         <div class="meter-card">
-          <span>Captured tab audio</span>
+          <span>Microphone audio</span>
           <meter id="inputMeter" min="0" max="1" value="0"></meter>
         </div>
         <div class="meter-card">
@@ -90,9 +90,9 @@
         <article class="guide-card">
           <h2>How to test</h2>
           <ol>
-            <li>Open any browser tab that is playing audio.</li>
-            <li>Return here and choose that tab from the browser picker.</li>
-            <li>Enable tab audio in the picker, then listen for translation.</li>
+            <li>Choose the language you want to hear.</li>
+            <li>Click start and allow microphone access when prompted.</li>
+            <li>Speak into your microphone, then listen for translation.</li>
           </ol>
           <dl class="diagnostics">
             <div>

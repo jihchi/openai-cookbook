@@ -1,5 +1,5 @@
 import { buildAudioMixState } from "/audio-mix.js";
-import { buildDisplayMediaOptions } from "/capture-options.js";
+import { buildMicrophoneAudioConstraints } from "/capture-options.js";
 
 const TRANSLATION_CALL_URL =
   "https://api.openai.com/v1/realtime/translations/calls";
@@ -35,7 +35,6 @@ let meterContext = null;
 let meterSource = null;
 let meterAnalyser = null;
 let meterTimer = null;
-let sourceAudio = null;
 let translatedAudio = null;
 let diagnostics = createEmptyDiagnostics();
 
@@ -49,11 +48,10 @@ startButton.addEventListener("click", async () => {
   clearTranscript();
   resetDiagnostics();
   setControls({ running: true });
-  setStatus("Pick a browser tab with audio", "idle");
+  setStatus("Requesting microphone access", "idle");
 
   try {
-    captureStream = await captureTabAudio();
-    startSourceAudio(captureStream);
+    captureStream = await captureMicrophoneAudio();
     startInputMeter(captureStream);
 
     setStatus("Creating Realtime Translation session", "idle");
@@ -62,7 +60,7 @@ startButton.addEventListener("click", async () => {
     setStatus("Connecting WebRTC", "idle");
     await connectRealtimeTranslation(session, captureStream);
 
-    setStatus("Translating tab audio", "live");
+    setStatus("Translating microphone audio", "live");
   } catch (error) {
     logEvent("error", error instanceof Error ? error.message : String(error));
     await stop("Stopped after startup error", "error");
@@ -173,42 +171,39 @@ async function connectRealtimeTranslation(session, stream) {
   logEvent("webrtc.offer", `connected for ${session.targetLanguage}`);
 }
 
-async function captureTabAudio() {
-  if (!navigator.mediaDevices?.getDisplayMedia) {
-    throw new Error("This browser does not support tab audio capture.");
+async function captureMicrophoneAudio() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error("This browser does not support microphone capture.");
   }
 
-  const supportedConstraints =
-    navigator.mediaDevices.getSupportedConstraints?.() ?? {};
-  const stream = await navigator.mediaDevices.getDisplayMedia(
-    buildDisplayMediaOptions(supportedConstraints),
-  );
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: buildMicrophoneAudioConstraints(),
+    video: false,
+  });
 
   const audioTracks = stream.getAudioTracks();
-  const videoTracks = stream.getVideoTracks();
 
   if (audioTracks.length === 0) {
     stream.getTracks().forEach((track) => track.stop());
-    throw new Error("No tab audio was shared. Pick a Chrome tab and enable tab audio.");
+    throw new Error("No microphone audio was captured. Allow microphone access and try again.");
   }
 
   audioTracks[0].addEventListener(
     "ended",
     () => {
-      void stop("Tab audio sharing ended", "idle");
+      void stop("Microphone sharing ended", "idle");
     },
     { once: true },
   );
 
   const audioSettings = audioTracks[0].getSettings?.() ?? {};
-  const suppressed =
-    typeof audioSettings.suppressLocalAudioPlayback === "boolean"
-      ? String(audioSettings.suppressLocalAudioPlayback)
-      : "unknown";
-  captureState.textContent = `audio=${audioTracks[0].readyState}, video=${videoTracks.length}, suppressed=${suppressed}`;
+  const deviceLabel = audioTracks[0].label || "microphone";
+  const sampleRate = audioSettings.sampleRate ?? "unknown";
+  const channelCount = audioSettings.channelCount ?? "unknown";
+  captureState.textContent = `audio=${audioTracks[0].readyState}, device=${deviceLabel}, sampleRate=${sampleRate}, channels=${channelCount}`;
   logEvent(
     "capture.started",
-    `audio tracks=${audioTracks.length}, video tracks=${videoTracks.length}, suppressed=${suppressed}`,
+    `microphone tracks=${audioTracks.length}, sampleRate=${sampleRate}, channels=${channelCount}`,
   );
 
   return stream;
@@ -235,29 +230,14 @@ function startInputMeter(stream) {
   }, 100);
 }
 
-function startSourceAudio(stream) {
-  sourceAudio = new Audio();
-  sourceAudio.autoplay = true;
-  sourceAudio.playsInline = true;
-  sourceAudio.srcObject = stream;
-  applyAudioMix();
-
-  void sourceAudio.play().catch((error) => {
-    logEvent("source.audio.play", error.message);
-  });
-}
-
 function applyAudioMix() {
   const mix = buildAudioMixState(audioMix.value);
 
   audioMix.value = String(mix.translatedPercent);
   mixValue.textContent = mix.valueLabel;
-  originalMixLabel.textContent = mix.originalLabel;
+  originalMixLabel.textContent = "Mic monitor off";
   translatedMixLabel.textContent = mix.translatedLabel;
 
-  if (sourceAudio) {
-    sourceAudio.volume = mix.originalVolume;
-  }
   if (translatedAudio) {
     translatedAudio.volume = mix.translatedVolume;
   }
@@ -324,12 +304,6 @@ async function stop(message, state = "idle") {
 
   peerConnection?.close();
   peerConnection = null;
-
-  if (sourceAudio) {
-    sourceAudio.pause();
-    sourceAudio.srcObject = null;
-  }
-  sourceAudio = null;
 
   captureStream?.getTracks().forEach((track) => track.stop());
   captureStream = null;

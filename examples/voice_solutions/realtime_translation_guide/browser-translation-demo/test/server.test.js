@@ -26,11 +26,12 @@ test("serves the browser app from the root route", async () => {
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type") ?? "", /text\/html/);
     assert.match(body, /In-browser Realtime Translation/);
-    assert.match(body, /Choose tab to start translating/);
+    assert.match(body, /Start translating microphone/);
     assert.doesNotMatch(body, /Start translating</);
     assert.doesNotMatch(body, /OpenAI Developers/);
     assert.doesNotMatch(body, /class="topbar"/);
     assert.doesNotMatch(body, /Open a tab that is already playing audio/);
+    assert.doesNotMatch(body, /Choose\s+tab/);
   });
 });
 

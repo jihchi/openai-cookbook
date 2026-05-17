@@ -1,9 +1,9 @@
 # Browser Realtime Translation Demo
 
-This is a small browser demo for one-way live translation from tab audio. The
-server creates a short-lived OpenAI Realtime Translation client secret, and the
-browser uses WebRTC to send captured tab audio and play translated speech with
-captions.
+This is a small browser demo for one-way live translation from microphone audio.
+The server creates a short-lived OpenAI Realtime Translation client secret, and
+the browser uses WebRTC to send captured microphone audio and play translated
+speech with captions.
 
 ## Setup
 
@@ -35,21 +35,14 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by the server. Choose a browser tab with audio, pick
-the language you want to hear, and start translation.
+Open the local URL printed by the server. Pick the language you want to hear,
+start translation, allow microphone access, and speak into your microphone.
 
-## Audio mix
+## Audio output
 
-The app includes an Audio mix slider for balancing translated speech with the
-original tab audio. By default, it plays 85% translated audio and 15% original
-audio, matching the LiveKit demo.
-
-When the selected source is a browser tab, the demo still requests
-`suppressLocalAudioPlayback` in the `getDisplayMedia()` audio constraints.
-If the browser honors that setting, the slider controls both the translated
-audio and the original audio playback from this app. If the browser does not
-support local playback suppression, the source tab may continue playing outside
-the slider, so lower or mute the source tab if you hear too much original audio.
+The app captures microphone audio and sends it to Realtime Translation over
+WebRTC. It does not locally monitor the microphone, which avoids echo and
+feedback. The Audio mix slider controls translated speech playback volume.
 
 ## Validation
 
@@ -68,7 +61,7 @@ npm run smoke
 
 ## Notes
 
-- The browser uses `getDisplayMedia()` so the user explicitly chooses the source
-  tab.
+- The browser uses `getUserMedia()` so the user explicitly grants microphone
+  access.
 - WebRTC handles browser audio transport, so the browser does not need to
-  resample tab audio or manually send PCM chunks.
+  resample microphone audio or manually send PCM chunks.
