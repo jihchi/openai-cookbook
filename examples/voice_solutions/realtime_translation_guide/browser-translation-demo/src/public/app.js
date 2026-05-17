@@ -1,5 +1,6 @@
 import { buildAudioMixState } from "/audio-mix.js";
 import { buildMicrophoneAudioConstraints } from "/capture-options.js";
+import { appendTranscriptText, clearTranscriptElements } from "/transcripts.js";
 
 const TRANSLATION_CALL_URL =
   "https://api.openai.com/v1/realtime/translations/calls";
@@ -18,6 +19,7 @@ const statusDot = document.querySelector("#statusDot");
 const statusText = document.querySelector("#statusText");
 const inputMeter = document.querySelector("#inputMeter");
 const queueProgress = document.querySelector("#queueProgress");
+const originalTranscript = document.querySelector("#originalTranscript");
 const translatedTranscript = document.querySelector("#translatedTranscript");
 const eventLog = document.querySelector("#eventLog");
 const captureState = document.querySelector("#captureState");
@@ -268,7 +270,8 @@ function handleRealtimeEvent(message) {
   }
 
   if (INPUT_TRANSCRIPT_EVENTS.has(event.type) && typeof event.delta === "string") {
-    logEvent("input", event.delta);
+    appendOriginalText(event.delta);
+    updateDiagnostics();
     return;
   }
 
@@ -333,13 +336,16 @@ function setStatus(message, state) {
   }`;
 }
 
+function appendOriginalText(text) {
+  appendTranscriptText(originalTranscript, text);
+}
+
 function appendTranslatedText(text) {
-  translatedTranscript.textContent += text;
-  translatedTranscript.scrollTop = translatedTranscript.scrollHeight;
+  appendTranscriptText(translatedTranscript, text);
 }
 
 function clearTranscript() {
-  translatedTranscript.textContent = "";
+  clearTranscriptElements(originalTranscript, translatedTranscript);
 }
 
 function createEmptyDiagnostics() {

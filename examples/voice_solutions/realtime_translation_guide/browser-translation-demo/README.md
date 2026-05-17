@@ -3,7 +3,7 @@
 This is a small browser demo for one-way live translation from microphone audio.
 The server creates a short-lived OpenAI Realtime Translation client secret, and
 the browser uses WebRTC to send captured microphone audio and play translated
-speech with captions.
+speech with original and translated captions.
 
 ## Setup
 

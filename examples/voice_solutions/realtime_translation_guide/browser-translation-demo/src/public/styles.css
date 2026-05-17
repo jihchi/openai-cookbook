@@ -324,7 +324,7 @@ progress {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(273px, 0.98fr) minmax(320px, 1.06fr) minmax(280px, 0.96fr);
+  grid-template-columns: minmax(230px, 0.9fr) repeat(2, minmax(240px, 1fr)) minmax(240px, 0.95fr);
   gap: 14px;
 }
 
